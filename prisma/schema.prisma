@@ -60,7 +60,7 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-model Apartment {
+model apartment {
   id            String        @id @default(cuid())
   name          String
   description   String?

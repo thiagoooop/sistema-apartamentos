@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { Apartment } from '@prisma/client';
+import { apartment } from '@prisma/client';
 
 export async function GET() {
   try {
@@ -17,7 +17,7 @@ export async function GET() {
     });
 
     const occupancyData = await Promise.all(
-      apartments.map(async (apartment: Apartment) => {
+      apartments.map(async (apartment: apartment) => {
         const reservations = await prisma.reservation.count({
           where: {
             apartmentId: apartment.id,
