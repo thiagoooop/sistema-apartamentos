@@ -1,0 +1,243 @@
+
+generator client {
+    provider = "prisma-client-js"
+    binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
+    output = "/home/ubuntu/sistema-apartamentos/app/node_modules/.prisma/client"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  accounts      Account[]
+  sessions      Session[]
+  createdTasks  Task[]
+  createdExpenses Expense[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Apartment {
+  id            String        @id @default(cuid())
+  name          String
+  description   String?
+  basePrice     Float         @default(0)
+  maxGuests     Int           @default(2)
+  isActive      Boolean       @default(true)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  reservations  Reservation[]
+  pricing       Pricing[]
+  tasks         Task[]
+  expenses      Expense[]
+  propertyMaps  PropertyMap[]
+}
+
+model Client {
+  id            String        @id @default(cuid())
+  name          String
+  email         String        @unique
+  phone         String?
+  cpf           String?       @unique
+  birthDate     DateTime?
+  address       String?
+  city          String?
+  state         String?
+  zipCode       String?
+  totalStays    Int           @default(0)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  reservations  Reservation[]
+}
+
+model Reservation {
+  id            String            @id @default(cuid())
+  checkIn       DateTime
+  checkOut      DateTime
+  guests        Int               @default(1)
+  totalAmount   Float
+  paidAmount    Float             @default(0)
+  paymentStatus PaymentStatus     @default(PENDING)
+  status        ReservationStatus @default(CONFIRMED)
+  notes         String?
+  source        String?           @default("MANUAL")
+  apartmentId   String
+  clientId      String
+  apartment     Apartment         @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  client        Client            @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+}
+
+model Pricing {
+  id          String    @id @default(cuid())
+  startDate   DateTime
+  endDate     DateTime
+  price       Float
+  apartmentId String
+  apartment   Apartment @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  @@unique([apartmentId, startDate, endDate])
+}
+
+enum PaymentStatus {
+  PENDING
+  PARTIAL
+  PAID
+}
+
+enum ReservationStatus {
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  IN_PROGRESS
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  description String?
+  color       String?   @default("#3B82F6")
+  type        CategoryType
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  tasks       Task[]
+  expenses    Expense[]
+}
+
+model Task {
+  id          String      @id @default(cuid())
+  title       String
+  description String?
+  status      TaskStatus  @default(PENDING)
+  priority    TaskPriority @default(MEDIUM)
+  dueDate     DateTime?
+  completedAt DateTime?
+  apartmentId String?
+  categoryId  String?
+  assignedTo  String?
+  createdBy   String
+  apartment   Apartment?  @relation(fields: [apartmentId], references: [id], onDelete: SetNull)
+  category    Category?   @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  creator     User        @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model Expense {
+  id          String      @id @default(cuid())
+  description String
+  amount      Float
+  expenseDate DateTime
+  receiptUrl  String?
+  apartmentId String?
+  categoryId  String?
+  createdBy   String
+  apartment   Apartment?  @relation(fields: [apartmentId], references: [id], onDelete: SetNull)
+  category    Category?   @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  creator     User        @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model IntegrationConfig {
+  id            String          @id @default(cuid())
+  platform      Platform        @unique
+  isActive      Boolean         @default(false)
+  apiKey        String?
+  apiSecret     String?
+  webhookUrl    String?
+  settings      Json?
+  lastSync      DateTime?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  propertyMaps  PropertyMap[]
+}
+
+model PropertyMap {
+  id               String            @id @default(cuid())
+  apartmentId      String
+  externalId       String
+  externalName     String?
+  integrationId    String
+  isActive         Boolean           @default(true)
+  apartment        Apartment         @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  integration      IntegrationConfig @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  
+  @@unique([integrationId, externalId])
+}
+
+enum CategoryType {
+  TASK
+  EXPENSE
+  BOTH
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum Platform {
+  BOOKING
+  AIRBNB
+  VRBO
+  MANUAL
+}

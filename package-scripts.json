@@ -1,0 +1,12 @@
+
+{
+  "scripts": {
+    "setup:supabase": "npx tsx scripts/setup-supabase.ts",
+    "migrate:supabase": "npx tsx scripts/migrate-to-supabase.ts",
+    "test:production": "npx tsx scripts/test-production.ts",
+    "deploy:prepare": "npm run build && npm run test:production",
+    "prisma:migrate": "npx prisma migrate deploy",
+    "prisma:generate": "npx prisma generate",
+    "prisma:studio": "npx prisma studio"
+  }
+}
