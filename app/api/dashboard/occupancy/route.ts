@@ -1,14 +1,14 @@
-
 export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { Apartment } from '@prisma/client';
+import { apartment as Apartment } from '@prisma/client'; // Importamos o tipo e damos um apelido
 
 export async function GET() {
   try {
     const now = new Date();
-    const Apartments = await prisma.Apartment.findMany({
+    // Correção 1: Usamos prisma.apartment (minúsculo) como definido no seu schema
+    const apartments = await prisma.apartment.findMany({
       where: { isActive: true },
       select: {
         id: true,
@@ -17,10 +17,12 @@ export async function GET() {
     });
 
     const occupancyData = await Promise.all(
-      Apartments.map(async (Apartment: Apartment) => {
+      // Correção 2: Usamos a variável no plural e minúscula (convenção)
+      apartments.map(async (apt: Apartment) => { // Usamos o tipo com 'A' maiúsculo que o Prisma gera
         const reservations = await prisma.reservation.count({
           where: {
-            ApartmentId: Apartment.id,
+            // Correção 3: Usamos apartmentId (camelCase) como definido no schema
+            apartmentId: apt.id,
             checkIn: {
               lte: now,
             },
@@ -35,7 +37,7 @@ export async function GET() {
 
         const isOccupied = reservations > 0;
         return {
-          name: Apartment.name,
+          name: apt.name,
           value: isOccupied ? 100 : 0,
           color: isOccupied ? '#ef4444' : '#10b981',
         };
@@ -43,7 +45,7 @@ export async function GET() {
     );
 
     const totalOccupied = occupancyData.filter(apt => apt.value > 0).length;
-    const totalAvailable = Apartments.length - totalOccupied;
+    const totalAvailable = apartments.length - totalOccupied;
 
     const result = [
       {
