@@ -106,7 +106,7 @@ model Reservation {
   source        String?           @default("MANUAL")
   apartmentId   String
   clientId      String
-  apartment     Apartment         @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  apartment     apartment         @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
   client        Client            @relation(fields: [clientId], references: [id], onDelete: Cascade)
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
@@ -118,7 +118,7 @@ model Pricing {
   endDate     DateTime
   price       Float
   apartmentId String
-  apartment   Apartment @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  apartment   apartment @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   
@@ -163,7 +163,7 @@ model Task {
   categoryId  String?
   assignedTo  String?
   createdBy   String
-  apartment   Apartment?  @relation(fields: [apartmentId], references: [id], onDelete: SetNull)
+  apartment   apartment?  @relation(fields: [apartmentId], references: [id], onDelete: SetNull)
   category    Category?   @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   creator     User        @relation(fields: [createdBy], references: [id], onDelete: Cascade)
   createdAt   DateTime    @default(now())
@@ -179,7 +179,7 @@ model Expense {
   apartmentId String?
   categoryId  String?
   createdBy   String
-  apartment   Apartment?  @relation(fields: [apartmentId], references: [id], onDelete: SetNull)
+  apartment   apartment?  @relation(fields: [apartmentId], references: [id], onDelete: SetNull)
   category    Category?   @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   creator     User        @relation(fields: [createdBy], references: [id], onDelete: Cascade)
   createdAt   DateTime    @default(now())
@@ -207,7 +207,7 @@ model PropertyMap {
   externalName     String?
   integrationId    String
   isActive         Boolean           @default(true)
-  apartment        Apartment         @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  apartment        apartment         @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
   integration      IntegrationConfig @relation(fields: [integrationId], references: [id], onDelete: Cascade)
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
