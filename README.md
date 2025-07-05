@@ -3,7 +3,7 @@
 
 Sistema completo para gerenciar apartamentos, reservas, clientes e despesas. Desenvolvido com Next.js 14, React 18, TypeScript e Tailwind CSS.
 
-## 📋 Funcionalidades
+## 📋 Funcionalidadesss
 
 ### 🏡 Gestão de Apartamentos
 - ✅ Cadastro e gerenciamento de apartamentos
