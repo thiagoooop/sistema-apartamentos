@@ -2,27 +2,23 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { apartment as Apartment } from '@prisma/client'; // Importamos o tipo e damos um apelido
+// Correção Final: Importamos diretamente o tipo 'Apartment' com 'A' maiúsculo.
+import { Apartment } from '@prisma/client'; 
 
 export async function GET() {
   try {
     const now = new Date();
-    // Correção 1: Usamos prisma.apartment (minúsculo) como definido no seu schema
-    const apartments = await prisma.apartment.findMany({
+    // Usamos prisma.apartment (minúsculo) para a busca.
+    // O resultado será um array de objetos do tipo 'Apartment'.
+    const apartments: Apartment[] = await prisma.apartment.findMany({
       where: { isActive: true },
-      select: {
-        id: true,
-        name: true,
-      },
     });
 
     const occupancyData = await Promise.all(
-      // Correção 2: Usamos a variável no plural e minúscula (convenção)
-      apartments.map(async (apt: Apartment) => { // Usamos o tipo com 'A' maiúsculo que o Prisma gera
+      apartments.map(async (apartment: Apartment) => { // Tipamos o parâmetro corretamente.
         const reservations = await prisma.reservation.count({
           where: {
-            // Correção 3: Usamos apartmentId (camelCase) como definido no schema
-            apartmentId: apt.id,
+            apartmentId: apartment.id, // Usamos o id do parâmetro.
             checkIn: {
               lte: now,
             },
@@ -37,7 +33,7 @@ export async function GET() {
 
         const isOccupied = reservations > 0;
         return {
-          name: apt.name,
+          name: apartment.name,
           value: isOccupied ? 100 : 0,
           color: isOccupied ? '#ef4444' : '#10b981',
         };
@@ -45,7 +41,7 @@ export async function GET() {
     );
 
     const totalOccupied = occupancyData.filter(apt => apt.value > 0).length;
-    const totalAvailable = apartments.length - totalOccupied;
+    const totalAvailable = apartments.length;
 
     const result = [
       {
