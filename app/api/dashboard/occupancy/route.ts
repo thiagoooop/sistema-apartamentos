@@ -2,23 +2,21 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-// Correção Final: Importamos diretamente o tipo 'Apartment' com 'A' maiúsculo.
-import { Apartment } from '@prisma/client'; 
+// Correção Definitiva: Importamos o tipo 'apartment' com 'a' minúsculo, como o erro sugeriu.
+import { apartment } from '@prisma/client'; 
 
 export async function GET() {
   try {
     const now = new Date();
-    // Usamos prisma.apartment (minúsculo) para a busca.
-    // O resultado será um array de objetos do tipo 'Apartment'.
-    const apartments: Apartment[] = await prisma.apartment.findMany({
+    const apartments: apartment[] = await prisma.apartment.findMany({
       where: { isActive: true },
     });
 
     const occupancyData = await Promise.all(
-      apartments.map(async (apartment: Apartment) => { // Tipamos o parâmetro corretamente.
+      apartments.map(async (apt: apartment) => { // Usamos o tipo com 'a' minúsculo.
         const reservations = await prisma.reservation.count({
           where: {
-            apartmentId: apartment.id, // Usamos o id do parâmetro.
+            apartmentId: apt.id,
             checkIn: {
               lte: now,
             },
@@ -33,7 +31,7 @@ export async function GET() {
 
         const isOccupied = reservations > 0;
         return {
-          name: apartment.name,
+          name: apt.name,
           value: isOccupied ? 100 : 0,
           color: isOccupied ? '#ef4444' : '#10b981',
         };
