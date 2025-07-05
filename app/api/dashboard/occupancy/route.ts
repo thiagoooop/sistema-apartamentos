@@ -3,12 +3,12 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { apartment } from '@prisma/client';
+import { Apartment } from '@prisma/client';
 
 export async function GET() {
   try {
     const now = new Date();
-    const apartments = await prisma.apartment.findMany({
+    const Apartments = await prisma.Apartment.findMany({
       where: { isActive: true },
       select: {
         id: true,
@@ -17,10 +17,10 @@ export async function GET() {
     });
 
     const occupancyData = await Promise.all(
-      apartments.map(async (apartment: apartment) => {
+      Apartments.map(async (Apartment: Apartment) => {
         const reservations = await prisma.reservation.count({
           where: {
-            apartmentId: apartment.id,
+            ApartmentId: Apartment.id,
             checkIn: {
               lte: now,
             },
@@ -35,7 +35,7 @@ export async function GET() {
 
         const isOccupied = reservations > 0;
         return {
-          name: apartment.name,
+          name: Apartment.name,
           value: isOccupied ? 100 : 0,
           color: isOccupied ? '#ef4444' : '#10b981',
         };
@@ -43,7 +43,7 @@ export async function GET() {
     );
 
     const totalOccupied = occupancyData.filter(apt => apt.value > 0).length;
-    const totalAvailable = apartments.length - totalOccupied;
+    const totalAvailable = Apartments.length - totalOccupied;
 
     const result = [
       {
