@@ -1,8 +1,6 @@
-
-import { PrismaClient } from '@prisma/client';
+import 'dotenv/config';
+import { prisma } from '../lib/db'; 
 import bcrypt from 'bcryptjs';
-
-const prisma = new PrismaClient();
 
 async function setupSupabase() {
   console.log('🚀 Iniciando setup do Supabase...');
@@ -14,7 +12,7 @@ async function setupSupabase() {
 
     // Criar usuário administrador
     console.log('👤 Criando usuário administrador...');
-    const hashedPassword = await bcrypt.hash('Thi?242631', 10);
+    const hashedPassword = await bcrypt.hash('Luana123', 10);
     
     const user = await prisma.user.upsert({
       where: { email: 'thiago_pera@me.com' },
@@ -176,7 +174,7 @@ async function setupSupabase() {
 
     console.log('🎉 Setup do Supabase concluído com sucesso!');
     console.log('📧 Login: thiago_pera@me.com');
-    console.log('🔑 Senha: Thi?242631');
+    console.log('🔑 Senha: Luana123');
     
   } catch (error) {
     console.error('❌ Erro durante o setup:', error);
